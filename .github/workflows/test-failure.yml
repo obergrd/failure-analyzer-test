@@ -1,0 +1,32 @@
+
+name: Test Failure Analyzer
+
+on:
+  workflow_dispatch:
+
+jobs:
+  typescript-error:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simulate TypeScript error
+        run: |
+          echo "src/main.ts(15,8): error TS2307: Cannot find module 'missing-package'"
+          exit 1
+
+  npm-error:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simulate npm error
+        run: |
+          echo "npm ERR! code ERESOLVE"
+          echo "npm ERR! unable to resolve dependency tree"
+          exit 1
+
+  cmake-error:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Simulate CMake error
+        run: |
+          echo "CMake Error at CMakeLists.txt:10 (find_package):"
+          echo "Could not find a package configuration file provided by MissingLib"
+          exit 1
