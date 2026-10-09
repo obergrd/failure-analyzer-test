@@ -1,32 +1,42 @@
-
-name: Test Failure Analyzer
+name: Failure analyzer real fixtures
 
 on:
   workflow_dispatch:
 
 jobs:
-  typescript-error:
+  typescript-ts2307:
     runs-on: ubuntu-latest
     steps:
-      - name: Simulate TypeScript error
+      - name: Compile a project with a missing import
         run: |
-          echo "src/main.ts(15,8): error TS2307: Cannot find module 'missing-package'"
-          exit 1
-
-  npm-error:
+          mkdir fixture && cd fixture
+          printf "import missing from 'module-that-does-not-exist';\nconsole.log(missing);\n" > broken.ts
+          npm exec --yes --package typescript@5.7.3 tsc --noEmit --module commonjs --moduleResolution node broken.ts
+  cmake-find-package:
     runs-on: ubuntu-latest
     steps:
-      - name: Simulate npm error
+      - name: Configure a project with a missing package
         run: |
-          echo "npm ERR! code ERESOLVE"
-          echo "npm ERR! unable to resolve dependency tree"
-          exit 1
-
-  cmake-error:
+          mkdir fixture && cd fixture
+          printf 'cmake_minimum_required(VERSION 3.20)\nproject(FailureFixture)\nfind_package(MissingLib REQUIRED CONFIG)\n' > CMakeLists.txt
+          cmake -S . -B build
+  npm-eresolve:
     runs-on: ubuntu-latest
     steps:
-      - name: Simulate CMake error
+      - name: Install conflicting peer dependencies
         run: |
-          echo "CMake Error at CMakeLists.txt:10 (find_package):"
-          echo "Could not find a package configuration file provided by MissingLib"
-          exit 1
+          mkdir fixture && cd fixture
+          npm init --yes
+          npm install react@18.2.0 react-dom@17.0.2
+  multiple-diagnostics:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Produce a primary TS diagnostic followed by a cascade
+        run: |
+          mkdir fixture && cd fixture
+          printf "import missing from 'module-that-does-not-exist';\nconsole.log(missing);\n" > broken.ts
+          npm exec --yes --package typescript@5.7.3 tsc --noEmit --module commonjs --moduleResolution node broken.ts
+  succeeds:
+    runs-on: ubuntu-latest
+    steps:
+      - run: node --version
