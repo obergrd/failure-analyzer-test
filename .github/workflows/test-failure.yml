@@ -11,7 +11,8 @@ jobs:
         run: |
           mkdir fixture && cd fixture
           printf "import missing from 'module-that-does-not-exist';\nconsole.log(missing);\n" > broken.ts
-          npm exec --yes --package typescript@5.7.3 tsc --noEmit --module commonjs --moduleResolution node broken.ts
+          printf '{"compilerOptions":{"module":"commonjs","moduleResolution":"node","noEmit":true},"files":["broken.ts"]}\n' > tsconfig.json
+          npm exec --yes --package=typescript@5.7.3 -- tsc -p tsconfig.json
   cmake-find-package:
     runs-on: ubuntu-latest
     steps:
@@ -27,15 +28,16 @@ jobs:
         run: |
           mkdir fixture && cd fixture
           npm init --yes
-          npm install react@18.2.0 react-dom@17.0.2
+          npm install --strict-peer-deps react@18.2.0 react-dom@17.0.2
   multiple-diagnostics:
     runs-on: ubuntu-latest
     steps:
-      - name: Produce a primary TS diagnostic followed by a cascade
+      - name: Produce primary and secondary TypeScript diagnostics
         run: |
           mkdir fixture && cd fixture
-          printf "import missing from 'module-that-does-not-exist';\nconsole.log(missing);\n" > broken.ts
-          npm exec --yes --package typescript@5.7.3 tsc --noEmit --module commonjs --moduleResolution node broken.ts
+          printf "import missing from 'module-that-does-not-exist';\nconst mustBeNumber: number = 'secondary';\nconsole.log(missing);\n" > broken.ts
+          printf '{"compilerOptions":{"module":"commonjs","moduleResolution":"node","noEmit":true},"files":["broken.ts"]}\n' > tsconfig.json
+          npm exec --yes --package=typescript@5.7.3 -- tsc -p tsconfig.json
   succeeds:
     runs-on: ubuntu-latest
     steps:
