@@ -1,0 +1,27 @@
+name: Repairable TypeScript fixture
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test/mcp-repair
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: fixtures/repairable-typescript/package-lock.json
+      - name: Install fixture dependencies
+        run: npm ci --prefix fixtures/repairable-typescript
+      - name: Typecheck repairable fixture
+        run: npm run typecheck --prefix fixtures/repairable-typescript
+      - name: Run repaired fixture
+        run: npm run verify --prefix fixtures/repairable-typescript
