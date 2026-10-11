@@ -1,0 +1,25 @@
+name: Repairable import fixture
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test/mcp-repair-ts2307
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: fixtures/repairable-import/package-lock.json
+      - name: Install fixture dependencies
+        run: npm ci --prefix fixtures/repairable-import
+      - name: Typecheck repairable import fixture
+        run: npm run typecheck --prefix fixtures/repairable-import
